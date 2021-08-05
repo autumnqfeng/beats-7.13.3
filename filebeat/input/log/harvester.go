@@ -429,6 +429,13 @@ func (h *Harvester) onMessage(
 				"path": state.Source,
 			},
 		},
+		"output": common.MapStr{
+			"hosts":   h.config.Output.Hosts,
+			"codec":   h.config.Output.Codec,
+			"prefix":  h.config.Output.Prefix,
+			"cluster": h.config.Output.Cluster,
+			"topic":   h.config.Output.Topic,
+		},
 	}
 	fields.DeepUpdate(message.Fields)
 

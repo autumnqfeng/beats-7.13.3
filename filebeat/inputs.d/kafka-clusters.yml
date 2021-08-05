@@ -1,0 +1,30 @@
+- type: log
+  enabled: true
+  symlinks: true
+  paths:
+  - /Users/qiufeng/Documents/beat/test/test-0803.log
+  tail_files: true
+  scan_frequency: 10s
+  backoff: 1s
+  max_backoff: 10s
+  output:
+    hosts: 127.0.0.1:9092
+    codec: format
+    prefix: '[qiufengdeMacBook-Pro.local]'
+    cluster: filebeat_test1
+    topic: filebeat-kafka-clusters-test-0803-4
+- type: log
+  enabled: true
+  symlinks: true
+  paths:
+  - /Users/qiufeng/Documents/beat/test/test-0803-1.log
+  tail_files: true
+  scan_frequency: 10s
+  backoff: 1s
+  max_backoff: 10s
+  output:
+    hosts: 10.208.251.93:39092
+    codec: format
+    prefix: '[qiufengdeMacBook-Pro.local]'
+    cluster: filebeat_test
+    topic: filebeat_test_2021_0729

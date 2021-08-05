@@ -77,6 +77,16 @@ type config struct {
 		Format   string `config:"format"`
 		CRIFlags bool   `config:"cri_flags"`
 	} `config:"docker-json"`
+
+	Output Output `config:"output"`
+}
+
+type Output struct {
+	Hosts   string `config:"hosts"`
+	Codec   string `config:"codec"`
+	Prefix  string `config:"prefix"`
+	Cluster string `config:"cluster"`
+	Topic   string `config:"topic"`
 }
 
 type LogConfig struct {
