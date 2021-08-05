@@ -24,7 +24,7 @@
   max_backoff: 10s
   output:
     hosts: 10.208.251.93:39092
-    codec: format
+    codec: json
     prefix: '[qiufengdeMacBook-Pro.local]'
     cluster: filebeat_test
     topic: filebeat_test_2021_0729

@@ -28,6 +28,8 @@ output.kafka-cluster:
   required_acks: 1
   compression: gzip
   max_message_bytes: 1000000
+  codec.adaptor:
+    string: '%{[output.prefix]} %{[message]}'
 
 # ================================== Logging ===================================
 
