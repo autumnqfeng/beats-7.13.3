@@ -34,6 +34,7 @@ import (
 	v2 "github.com/elastic/beats/v7/filebeat/input/v2"
 	"github.com/elastic/beats/v7/filebeat/input/v2/compat"
 	"github.com/elastic/beats/v7/filebeat/registrar"
+	"github.com/elastic/beats/v7/filebeat/updater"
 	"github.com/elastic/beats/v7/libbeat/autodiscover"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/cfgfile"
@@ -407,6 +408,12 @@ func (fb *Filebeat) Run(b *beat.Beat) error {
 		return err
 	}
 
+	updater, err := updater.New(config.Updater, registrar)
+	if err != nil {
+		logp.Err("Could not init updater: %v", err)
+		return err
+	}
+
 	// The order of starting and stopping is important. Stopping is inverted to the starting order.
 	// The current order is: registrar, publisher, spooler, crawler
 	// That means, crawler is stopped first.
@@ -439,6 +446,12 @@ func (fb *Filebeat) Run(b *beat.Beat) error {
 	if err != nil {
 		crawler.Stop()
 		return fmt.Errorf("Failed to start crawler: %+v", err)
+	}
+
+	err = updater.Start()
+	if err != nil {
+		updater.Stop()
+		return err
 	}
 
 	// If run once, add crawler completion check as alternative to done signal
@@ -489,6 +502,7 @@ func (fb *Filebeat) Run(b *beat.Beat) error {
 	modules.Stop()
 	adiscover.Stop()
 	crawler.Stop()
+	updater.Stop()
 
 	timeout := fb.config.ShutdownTimeout
 	// Checks if on shutdown it should wait for all events to be published

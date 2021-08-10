@@ -48,6 +48,7 @@ type Config struct {
 	ConfigModules      *common.Config       `config:"config.modules"`
 	Autodiscover       *autodiscover.Config `config:"autodiscover"`
 	OverwritePipelines bool                 `config:"overwrite_pipelines"`
+	Updater            *common.Config       `config:"updater"`
 }
 
 type Registry struct {

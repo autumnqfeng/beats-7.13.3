@@ -31,6 +31,19 @@ output.kafka-cluster:
   codec.adaptor:
     string: '%{[output.prefix]} %{[message]}'
 
+#================================= updater ==================================
+#updater is for fetching config from log collect service and report collecting
+#progress to it.
+#path is where to persist config and it must in keep with input path
+filebeat.updater:
+  enabled: true
+  host: 127.0.0.1:8080
+  user: filebeat
+  password: file_beat
+  period: 10s
+  path: /Users/qiufeng/go/src/github.com/elastic/beats/filebeat/inputs.d/kafka-clusters.yml
+  timeout: 5s
+
 # ================================== Logging ===================================
 
 # Sets log level. The default log level is info.

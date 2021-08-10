@@ -110,7 +110,7 @@ func (c *kafkaClient) Connect() error {
 	c.log.Debugf("connect: %v", c.hosts)
 
 	// try to connect
-	producer, err := sarama.NewAsyncProducer([]string{c.hosts}, &c.config)
+	producer, err := sarama.NewAsyncProducer(strings.Split(c.hosts, ","), &c.config)
 	if err != nil {
 		c.log.Errorf("Kafka connect fails with: %+v", err)
 		return err
