@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/elastic/beats/v7/filebeat/input/file"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
@@ -32,19 +33,25 @@ type entry struct {
 }
 
 func NewDiskStore(
-	logFilePath string,
+	registryPath string,
+	logFile string,
 	fallback bool,
 ) (*Diskstore, error) {
 
 	s := &Diskstore{
-		logFilePath: logFilePath,
+		logFilePath: filepath.Join(registryPath, logFile),
 		nextTxID:    1,
 		logFile:     nil,
 		table:       make(map[string]entry),
 	}
 
+	if !common.Exist(registryPath) {
+		_ = os.Mkdir(registryPath, os.ModePerm)
+	}
+
 	// default fallback is false(logstash -> filebeat), need to delete registry log
 	if !fallback {
+
 		_ = s.deleteLog()
 	}
 
@@ -78,6 +85,10 @@ func (s *Diskstore) tryOpenLog() error {
 }
 
 func (s *Diskstore) LogOperation(op Op) error {
+	if op == nil {
+		return nil
+	}
+
 	writer := bufio.NewWriterSize(&ensureWriter{s.logFile}, defaultBufferSize)
 	counting := &countWriter{w: writer}
 

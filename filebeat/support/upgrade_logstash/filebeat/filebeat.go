@@ -21,12 +21,13 @@ type FileBeat struct {
 }
 
 func NewFileBeat(fallback bool) *FileBeat {
+	zap.L().Debug("filebeat", zap.String("func NewFileBeat(fallback bool) *FileBeat", fmt.Sprintf("fallback: %v", fallback)))
 	fb := &FileBeat{
 		RegistryPath: viper.GetString("filebeat.registry_path"),
 		InputdPath:   viper.GetString("filebeat.inputd_path"),
 	}
 
-	diskStore, err := store.NewDiskStore(filepath.Join(fb.RegistryPath, logFileName), fallback)
+	diskStore, err := store.NewDiskStore(fb.RegistryPath, logFileName, fallback)
 	if err != nil {
 		zap.L().Error("filebeat", zap.String("disk store err msg", fmt.Sprintf("Failed to new diskStore: %s", err)))
 		return nil

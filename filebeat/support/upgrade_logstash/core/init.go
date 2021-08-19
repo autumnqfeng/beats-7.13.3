@@ -19,13 +19,13 @@ func init() {
 		os.Exit(1)
 	}
 
-	Upgrade = NewUpgrade()
-
 	// init log
 	if err := initLogger(); err != nil {
 		zap.L().Error("init zap log filed")
 		os.Exit(1)
 	}
+
+	Upgrade = NewUpgrade()
 }
 
 func initViper() error {

@@ -56,7 +56,16 @@ func IsFile(path string) (bool, error) {
 	return !isDir, err
 }
 
+func Exist(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil || os.IsExist(err)
+}
+
 func DeleteFile(path string) error {
+	if !Exist(path) {
+		return nil
+	}
+
 	isFile, err := IsFile(path)
 	if err != nil {
 		return err
