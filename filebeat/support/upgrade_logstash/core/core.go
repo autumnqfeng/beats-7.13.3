@@ -1,12 +1,11 @@
 package core
 
 import (
-	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/filebeat/input_d"
-	"go.uber.org/zap"
-
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/filebeat"
+	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/filebeat/input_d"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/logstash"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 var Upgrade *upgrade

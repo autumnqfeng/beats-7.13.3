@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/elastic/beats/v7/filebeat/input/file"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
 	"github.com/elastic/beats/v7/libbeat/common/transform/typeconv"
-	"os"
-
 	"go.uber.org/zap"
 )
 

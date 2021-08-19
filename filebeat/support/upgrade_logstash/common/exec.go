@@ -3,9 +3,10 @@ package common
 import (
 	"bufio"
 	"fmt"
-	"go.uber.org/zap"
 	"os/exec"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 // noinspection GoUnreachableCode

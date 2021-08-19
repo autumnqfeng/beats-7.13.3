@@ -3,10 +3,11 @@ package common
 import (
 	"bufio"
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/elastic-agent/pkg/agent/errors"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/elastic/beats/v7/x-pack/elastic-agent/pkg/agent/errors"
 )
 
 const defaultFileMode os.FileMode = 0600

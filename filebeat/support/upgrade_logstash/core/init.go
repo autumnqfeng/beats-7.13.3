@@ -1,11 +1,12 @@
 package core
 
 import (
+	"os"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 var cfg = pflag.StringP("ConfigData", "c", "", "ConfigData file path")

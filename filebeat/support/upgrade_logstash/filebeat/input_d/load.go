@@ -2,10 +2,10 @@ package input_d
 
 import (
 	"fmt"
-	"github.com/dustin/go-humanize"
-	cfg "github.com/elastic/beats/v7/filebeat/config"
 	"time"
 
+	"github.com/dustin/go-humanize"
+	cfg "github.com/elastic/beats/v7/filebeat/config"
 	"github.com/elastic/beats/v7/filebeat/harvester"
 	"github.com/elastic/beats/v7/filebeat/input/log"
 	"github.com/elastic/beats/v7/libbeat/cfgfile"

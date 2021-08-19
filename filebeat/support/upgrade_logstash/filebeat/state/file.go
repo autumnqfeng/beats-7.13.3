@@ -2,11 +2,10 @@ package state
 
 import (
 	"fmt"
-	"github.com/elastic/beats/v7/filebeat/input/file"
 	"os"
-
 	"path/filepath"
 
+	"github.com/elastic/beats/v7/filebeat/input/file"
 	"go.uber.org/zap"
 )
 

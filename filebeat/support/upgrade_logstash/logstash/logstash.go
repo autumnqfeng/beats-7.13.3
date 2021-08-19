@@ -3,13 +3,14 @@ package logstash
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
 	"github.com/joeshaw/multierror"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 const config = `input {

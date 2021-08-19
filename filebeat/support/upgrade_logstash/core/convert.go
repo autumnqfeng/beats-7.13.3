@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+
 	"github.com/elastic/beats/v7/filebeat/input/file"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/filebeat/input_d"
