@@ -3,7 +3,7 @@
 filebeat.config.inputs:
   enabled: true
   # Glob pattern for configuration loading
-  path: /Users/qiufeng/go/src/github.com/elastic/beats/filebeat/inputs.d/*.yml
+  path: /home/infra/filebeat/inputs.d/*.yml
 
   # Set to true to enable config reloading
   reload.enabled: true
@@ -41,7 +41,7 @@ filebeat.updater:
   user: filebeat
   password: file_beat
   period: 10s
-  path: /Users/qiufeng/go/src/github.com/elastic/beats/filebeat/inputs.d/kafka-clusters.yml
+  path: /home/infra/filebeat/inputs.d/kafka-clusters.yml
   timeout: 5s
 
 # ================================== Logging ===================================
@@ -50,6 +50,6 @@ filebeat.updater:
 # Available log levels are: error, warning, info, debug
 logging.level: debug
 
-path.home: /Users/qiufeng/Documents/beat
-path.config: /Users/qiufeng/Documents/beat
-filebeat.registry.path: /Users/qiufeng/Documents/beat/registory
+path.home: /home/infra/filebeat
+path.config: /home/infra/filebeat
+filebeat.registry.path: /home/infra/filebeat/registry

@@ -1,0 +1,9 @@
+# default fallback is false(logstash -> filebeat)
+fallback: true
+logstash:
+  config_path: /home/infra/qbus2.0/log_collection2/config
+  sincedb_path: /home/infra
+
+filebeat:
+  registry_path: /home/infra/filebeat/registry
+  inputd_path: /home/infra/filebeat/inputs.d/kafka-clusters.yml

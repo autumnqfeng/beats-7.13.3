@@ -1,0 +1,179 @@
+package store
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"github.com/elastic/beats/v7/filebeat/input/file"
+	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
+	"github.com/elastic/beats/v7/libbeat/common/transform/typeconv"
+	"os"
+
+	"go.uber.org/zap"
+)
+
+const defaultBufferSize = 4 * 1024
+const defaultFileMode os.FileMode = 0600
+
+type Diskstore struct {
+	logFilePath string // current log file
+	nextTxID    uint64
+	logFile     *os.File
+	table       map[string]entry
+}
+
+type logAction struct {
+	Op string `json:"Op"`
+	ID uint64 `json:"id"`
+}
+
+type entry struct {
+	value map[string]interface{}
+}
+
+func NewDiskStore(
+	logFilePath string,
+	fallback bool,
+) (*Diskstore, error) {
+
+	s := &Diskstore{
+		logFilePath: logFilePath,
+		nextTxID:    1,
+		logFile:     nil,
+		table:       make(map[string]entry),
+	}
+
+	// default fallback is false(logstash -> filebeat), need to delete registry log
+	if !fallback {
+		_ = s.deleteLog()
+	}
+
+	return s, s.tryOpenLog()
+}
+
+func (s *Diskstore) deleteLog() error {
+	if err := common.DeleteFile(s.logFilePath); err != nil {
+		zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to delete file %v: %v", s.logFilePath, err)))
+		return err
+	}
+	return nil
+}
+
+func (s *Diskstore) tryOpenLog() error {
+	flags := os.O_RDWR | os.O_CREATE
+
+	f, err := os.OpenFile(s.logFilePath, flags, defaultFileMode)
+	if err != nil {
+		zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to open file %v: %v", s.logFilePath, err)))
+		return err
+	}
+
+	_, err = f.Seek(0, os.SEEK_END)
+	if err != nil {
+		return err
+	}
+
+	s.logFile = f
+	return nil
+}
+
+func (s *Diskstore) LogOperation(op Op) error {
+	writer := bufio.NewWriterSize(&ensureWriter{s.logFile}, defaultBufferSize)
+	counting := &countWriter{w: writer}
+
+	enc := newJSONEncoder(counting)
+	if err := enc.Encode(logAction{Op: op.Name(), ID: s.nextTxID}); err != nil {
+		return err
+	}
+	_ = writer.WriteByte('\n')
+
+	if err := enc.Encode(op); err != nil {
+		return err
+	}
+	_ = writer.WriteByte('\n')
+
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+
+	s.nextTxID++
+	return nil
+}
+
+func (s *Diskstore) LoadStates() ([]file.State, error) {
+	states := make([]file.State, 0)
+	for _, V := range s.table {
+		s := file.State{}
+		if err := V.Decode(&s); err != nil {
+			return nil, err
+		}
+		states = append(states, s)
+	}
+	return states, nil
+}
+
+func (s *Diskstore) LoadLogFile() (err error) {
+	err = s.readLogFile(func(rawOp Op) error {
+		switch op := rawOp.(type) {
+		case *OpSet:
+			s.Set(op.K, op.V)
+		case *OpRemove:
+			s.Remove(op.K)
+		}
+		return nil
+	})
+	return err
+}
+
+// readLogFile iterates all operations found in the transaction log.
+func (s *Diskstore) readLogFile(fn func(Op) error) error {
+	path := s.logFilePath
+	f, err := os.Open(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	for dec.More() {
+		var act logAction
+		if err := dec.Decode(&act); err != nil {
+			return err
+		}
+
+		var op Op
+		switch act.Op {
+		case opValSet:
+			op = &OpSet{}
+		case opValRemove:
+			op = &OpRemove{}
+		}
+
+		if err := dec.Decode(op); err != nil {
+			return err
+		}
+
+		if err := fn(op); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Diskstore) Set(key string, value MapStr) {
+	s.table[key] = entry{value: value}
+}
+
+func (s *Diskstore) Remove(key string) bool {
+	_, exists := s.table[key]
+	if !exists {
+		return false
+	}
+	delete(s.table, key)
+	return true
+}
+
+func (e entry) Decode(to interface{}) error {
+	return typeconv.Convert(to, e.value)
+}
