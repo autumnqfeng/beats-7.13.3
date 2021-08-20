@@ -16,11 +16,12 @@ import (
 const defaultBufferSize = 4 * 1024
 const defaultFileMode os.FileMode = 0600
 
-type Diskstore struct {
-	logFilePath string // current log file
-	nextTxID    uint64
-	logFile     *os.File
-	table       map[string]entry
+type DiskStore struct {
+	registryPath string
+	logFilePath  string // current log file
+	nextTxID     uint64
+	logFile      *os.File
+	table        map[string]entry
 }
 
 type logAction struct {
@@ -36,29 +37,33 @@ func NewDiskStore(
 	registryPath string,
 	logFile string,
 	fallback bool,
-) (*Diskstore, error) {
-
-	s := &Diskstore{
-		logFilePath: filepath.Join(registryPath, logFile),
-		nextTxID:    1,
-		logFile:     nil,
-		table:       make(map[string]entry),
-	}
-
-	if !common.Exist(registryPath) {
-		_ = os.Mkdir(registryPath, os.ModePerm)
+) (*DiskStore, error) {
+	s := &DiskStore{
+		registryPath: registryPath,
+		logFilePath:  filepath.Join(registryPath, logFile),
+		nextTxID:     1,
+		logFile:      nil,
+		table:        make(map[string]entry),
 	}
 
 	// default fallback is false(logstash -> filebeat), need to delete registry log
 	if !fallback {
-
-		_ = s.deleteLog()
+		if err := s.deleteLog(); err != nil {
+			zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to init DiskStore %v", err)))
+			return nil, err
+		}
 	}
-
 	return s, s.tryOpenLog()
 }
 
-func (s *Diskstore) deleteLog() error {
+func (s *DiskStore) deleteLog() error {
+	if !common.Exist(s.registryPath) {
+		if err := os.Mkdir(s.registryPath, os.ModePerm); err != nil {
+			zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to creat dir %v: %v", s.registryPath, err)))
+			return err
+		}
+	}
+
 	if err := common.DeleteFile(s.logFilePath); err != nil {
 		zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to delete file %v: %v", s.logFilePath, err)))
 		return err
@@ -66,7 +71,7 @@ func (s *Diskstore) deleteLog() error {
 	return nil
 }
 
-func (s *Diskstore) tryOpenLog() error {
+func (s *DiskStore) tryOpenLog() error {
 	flags := os.O_RDWR | os.O_CREATE
 
 	f, err := os.OpenFile(s.logFilePath, flags, defaultFileMode)
@@ -84,7 +89,7 @@ func (s *Diskstore) tryOpenLog() error {
 	return nil
 }
 
-func (s *Diskstore) LogOperation(op Op) error {
+func (s *DiskStore) LogOperation(op Op) error {
 	if op == nil {
 		return nil
 	}
@@ -111,7 +116,7 @@ func (s *Diskstore) LogOperation(op Op) error {
 	return nil
 }
 
-func (s *Diskstore) LoadStates() ([]file.State, error) {
+func (s *DiskStore) LoadStates() ([]file.State, error) {
 	states := make([]file.State, 0)
 	for _, V := range s.table {
 		s := file.State{}
@@ -123,7 +128,7 @@ func (s *Diskstore) LoadStates() ([]file.State, error) {
 	return states, nil
 }
 
-func (s *Diskstore) LoadLogFile() (err error) {
+func (s *DiskStore) LoadLogFile() (err error) {
 	err = s.readLogFile(func(rawOp Op) error {
 		switch op := rawOp.(type) {
 		case *OpSet:
@@ -137,7 +142,7 @@ func (s *Diskstore) LoadLogFile() (err error) {
 }
 
 // readLogFile iterates all operations found in the transaction log.
-func (s *Diskstore) readLogFile(fn func(Op) error) error {
+func (s *DiskStore) readLogFile(fn func(Op) error) error {
 	path := s.logFilePath
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {
@@ -172,11 +177,11 @@ func (s *Diskstore) readLogFile(fn func(Op) error) error {
 	return nil
 }
 
-func (s *Diskstore) Set(key string, value MapStr) {
+func (s *DiskStore) Set(key string, value MapStr) {
 	s.table[key] = entry{value: value}
 }
 
-func (s *Diskstore) Remove(key string) bool {
+func (s *DiskStore) Remove(key string) bool {
 	_, exists := s.table[key]
 	if !exists {
 		return false

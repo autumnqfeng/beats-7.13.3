@@ -17,7 +17,7 @@ const fileStatePrefix = "filebeat::logs::"
 type FileBeat struct {
 	RegistryPath string `yaml:"registry_path"`
 	InputdPath   string `yaml:"inputd_path"`
-	disk         *store.Diskstore
+	disk         *store.DiskStore
 }
 
 func NewFileBeat(fallback bool) *FileBeat {
