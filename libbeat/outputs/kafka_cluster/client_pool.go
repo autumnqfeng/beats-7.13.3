@@ -92,13 +92,13 @@ func (p *clientPool) getClient(cluster string) *kafkaClient {
 	return client
 }
 
-func (p *clientPool) addClient(cluster string, client *kafkaClient) (*kafkaClient, error) {
-	if err := p.pool.add(cluster, client, 60*60*10); err != nil {
+func (p *clientPool) addClient(clusterTopic string, client *kafkaClient) (*kafkaClient, error) {
+	if err := p.pool.add(clusterTopic, client, 60*60*10); err != nil {
 		return nil, err
 	}
 
 	if err := client.Connect(); err != nil {
-		return nil, fmt.Errorf("%v kafka connect failed with %v", cluster, err)
+		return nil, fmt.Errorf("%v kafka connect failed with %v", clusterTopic, err)
 	}
 	return client, nil
 }
