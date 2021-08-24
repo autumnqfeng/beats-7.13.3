@@ -30,20 +30,21 @@ const input = `
 	}`
 
 const output = `
-	if [type] == "%s"
-	kafka {
-		codec => plain {
-			format => "%s"
+	if [type] == "%s" {
+		kafka {
+			codec => plain {
+				format => "%s"
+			}
+			bootstrap_servers => "%s"
+			topic_id => "%s"
+			linger_ms => 100
+			retries => 10
+			retry_backoff_ms => 200
+			reconnect_backoff_ms => 500
+			metadata_fetch_timeout_ms => 10000
+			buffer_memory => 33554432
+			batch_size => 16384
 		}
-		bootstrap_servers => "%s"
-		topic_id => "%s"
-		linger_ms => 100
-		retries => 10
-		retry_backoff_ms => 200
-		reconnect_backoff_ms => 500
-		metadata_fetch_timeout_ms => 10000
-		buffer_memory => 33554432
-		batch_size => 16384
 	}`
 
 type Logstash struct {
