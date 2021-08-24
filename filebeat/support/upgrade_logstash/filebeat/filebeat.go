@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/elastic/beats/v7/filebeat/input/file"
+	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/common"
 	"github.com/elastic/beats/v7/filebeat/support/upgrade_logstash/filebeat/store"
 	"github.com/elastic/beats/v7/libbeat/common/transform/typeconv"
 	"github.com/spf13/viper"
@@ -35,6 +36,16 @@ func NewFileBeat(fallback bool) *FileBeat {
 	fb.disk = diskStore
 
 	return fb
+}
+
+// {"version":"1"}
+func (fb *FileBeat) WriteMeta() error {
+	filename := fmt.Sprintf("%s/filebeat/meta.json", fb.RegistryPath)
+	err := common.WriteFile(filename, []byte(`{"version":"1"}`))
+	if err != nil {
+		zap.L().Error("filebeat", zap.String("disk store err msg", fmt.Sprintf("Failed to write %s: %s", filename, err)))
+	}
+	return err
 }
 
 func (fb *FileBeat) WriteStates(states []file.State) error {

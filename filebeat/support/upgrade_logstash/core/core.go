@@ -47,7 +47,10 @@ func (u *upgrade) Execute() error {
 
 func (u *upgrade) logstashToFilebeat() error {
 	u.Logstash.ReadConfig()
-	return u.FileBeat.WriteStates(u.ltf.getStatesFromConfig(u.Logstash.Config))
+	if err := u.FileBeat.WriteStates(u.ltf.getStatesFromConfig(u.Logstash.Config)); err != nil {
+		return err
+	}
+	return u.FileBeat.WriteMeta()
 }
 
 func (u *upgrade) filebeatToLogstash() error {

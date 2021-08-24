@@ -58,7 +58,7 @@ func NewDiskStore(
 
 func (s *DiskStore) deleteLog() error {
 	if !common.Exist(s.registryPath) {
-		if err := os.Mkdir(s.registryPath, os.ModePerm); err != nil {
+		if err := os.MkdirAll(s.registryPath, os.ModePerm); err != nil {
 			zap.L().Error("filebeat", zap.String("diskStore", fmt.Sprintf("Failed to creat dir %v: %v", s.registryPath, err)))
 			return err
 		}
