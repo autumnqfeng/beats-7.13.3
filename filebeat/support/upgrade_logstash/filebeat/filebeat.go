@@ -27,7 +27,7 @@ func NewFileBeat(fallback bool) *FileBeat {
 		InputdPath:   viper.GetString("filebeat.inputd_path"),
 	}
 
-	diskStore, err := store.NewDiskStore(fb.RegistryPath, logFileName, fallback)
+	diskStore, err := store.NewDiskStore(fb.RegistryPath+"/filebeat", logFileName, fallback)
 	if err != nil {
 		zap.L().Error("filebeat", zap.String("disk store err msg", fmt.Sprintf("Failed to new diskStore: %s", err)))
 		return nil
