@@ -27,6 +27,7 @@ type FlatSnapshot struct {
 	Floats       map[string]float64
 	Strings      map[string]string
 	StringSlices map[string][]string
+	Interfaces   map[string]interface{}
 }
 
 type flatSnapshotVisitor struct {
@@ -74,6 +75,7 @@ func MakeFlatSnapshot() FlatSnapshot {
 		Floats:       map[string]float64{},
 		Strings:      map[string]string{},
 		StringSlices: map[string][]string{},
+		Interfaces:   map[string]interface{}{},
 	}
 }
 
@@ -148,6 +150,10 @@ func (vs *flatSnapshotVisitor) OnStringSlice(f []string) {
 	vs.snapshot.StringSlices[vs.getName()] = f
 }
 
+func (vs *flatSnapshotVisitor) OnInterface(i interface{}) {
+	vs.snapshot.Interfaces[vs.getName()] = i
+}
+
 func newStructSnapshotVisitor() *structSnapshotVisitor {
 	vs := &structSnapshotVisitor{}
 	vs.key.stack = vs.key.stack0[:0]
@@ -190,6 +196,7 @@ func (s *structSnapshotVisitor) OnStringSlice(f []string) {
 	copy(c, f)
 	s.setValue(c)
 }
+func (s *structSnapshotVisitor) OnInterface(i interface{}) { s.setValue(i) }
 
 func (s *structSnapshotVisitor) setValue(v interface{}) {
 	if s.event.current == nil {

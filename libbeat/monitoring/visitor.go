@@ -29,6 +29,7 @@ type ValueVisitor interface {
 	OnInt(i int64)
 	OnFloat(f float64)
 	OnStringSlice(f []string)
+	OnInterface(i interface{})
 }
 
 type RegistryVisitor interface {
